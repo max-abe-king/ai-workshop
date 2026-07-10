@@ -214,6 +214,31 @@ If both the matched path and the timeout path lead to the same next step, use a 
         next: Discount Offer     # different action
 ```
 
+### Collapsing back-to-back duration waits
+
+When a condition wait is converted to a duration wait, always collapse it with the preceding duration wait into a single step. Two consecutive duration waits are equivalent to one — leave them separate and you'll have redundant steps and dangling `next:` references when you rename them.
+
+```yaml
+# WRONG — two waits doing the job of one
+- type: wait
+  name: Wait 2 Days
+  next: Wait 3 More Days
+  with: { duration: 2, unit: day }
+
+- type: wait
+  name: Wait 3 More Days
+  next: End Stage
+  with: { duration: 3, unit: day }
+
+# CORRECT — collapse to one, update all next: references to match
+- type: wait
+  name: Wait 5 Days
+  next: End Stage
+  with: { duration: 5, unit: day }
+```
+
+**When this happens:** You start with Activation → Wait 2 Days → Condition Wait (3 days). If you convert the condition wait to a duration wait because both paths do the same thing, immediately merge the two waits and update every `next:` reference pointing to the old step name.
+
 ### Condition wait convergence requires a Merge
 
 When a condition wait's paths converge (each does something different, then rejoin), they must meet at a **Merge** step before End:
