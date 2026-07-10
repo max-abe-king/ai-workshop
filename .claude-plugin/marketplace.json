@@ -7,7 +7,8 @@
     "source": "./",
     "skills": [
       "./acme-retail/skills/brand-guide",
-      "./acme-retail/skills/channel-specs"
+      "./acme-retail/skills/channel-specs",
+      "./acme-retail/skills/journey-launch"
     ]
   }]
 }
