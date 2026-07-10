@@ -1,0 +1,13 @@
+{
+  "name": "ai-workshop",
+  "owner": { "name": "Max King" },
+  "plugins": [{
+    "name": "acme-retail",
+    "description": "Acme Retail brand & channel skills",
+    "source": "./",
+    "skills": [
+      "./acme-retail/skills/brand-guide",
+      "./acme-retail/skills/channel-specs"
+    ]
+  }]
+}
