@@ -26,6 +26,97 @@ Apply these limits and structure rules when writing or adapting any Acme Retail 
 5. Primary CTA
 6. Optional secondary block + CTA
 
+## HTML Email — Engage Compatibility Rules
+
+Engage and most email clients strip everything inside `<head>` — including `<style>` blocks and CSS classes. A browser preview will look correct because browsers support `<style>` blocks, but the email will break in Engage and in Gmail, Outlook, and Apple Mail.
+
+**The rule: every style must be written as an inline `style=""` attribute. No exceptions.**
+
+### What to never do
+```html
+<!-- WRONG — <style> block will be stripped by Engage -->
+<head>
+  <style>
+    .header { background-color: #0F2742; }
+    .cta-button { background-color: #13B8C4; color: white; }
+  </style>
+</head>
+<div class="header">...</div>
+<a class="cta-button">CLAIM YOUR OFFER</a>
+```
+
+### What to always do
+```html
+<!-- CORRECT — inline style survives every email client -->
+<div style="background-color: #0F2742; padding: 20px;">...</div>
+<a style="background-color: #13B8C4; color: #ffffff; padding: 12px 24px; text-decoration: none; font-family: Inter, Arial, sans-serif; font-weight: 600; font-size: 14px; letter-spacing: 0.08em; border-radius: 8px; display: inline-block;">CLAIM YOUR OFFER</a>
+```
+
+### Required inline style rules
+
+**Wrapper / canvas:**
+```html
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #F2EDE4;">
+  <tr><td align="center">
+    <table width="600" cellpadding="0" cellspacing="0" border="0">
+```
+Always use `<table>` layout — `<div>` layout breaks in Outlook.
+
+**Header block:**
+```html
+<td style="background-color: #0F2742; padding: 20px 24px;">
+```
+
+**Headline (Georgia serif):**
+```html
+<h1 style="font-family: Georgia, 'Times New Roman', serif; font-size: 28px; font-weight: 700; color: #0F2742; margin: 0 0 12px 0; line-height: 1.2;">
+```
+
+**Body copy (Inter/Arial):**
+```html
+<p style="font-family: Inter, Arial, sans-serif; font-size: 15px; font-weight: 400; color: #2D3748; line-height: 1.6; margin: 0 0 16px 0;">
+```
+
+**Primary CTA button:**
+```html
+<a href="#" style="display: inline-block; background-color: #13B8C4; color: #ffffff; font-family: Inter, Arial, sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-decoration: none; padding: 14px 28px; border-radius: 8px;">CLAIM YOUR OFFER</a>
+```
+
+**Loyalty / info strip:**
+```html
+<td style="background-color: #D6EEF0; padding: 12px 24px; font-family: Inter, Arial, sans-serif; font-size: 13px; color: #0F2742;">
+```
+
+**Footer:**
+```html
+<td style="background-color: #0F2742; padding: 20px 24px; text-align: center; font-family: Inter, Arial, sans-serif; font-size: 11px; color: #0A7C82;">
+```
+
+### Font stack rule
+Always specify a web-safe fallback after Inter and Georgia — email clients may not load web fonts:
+- Headlines: `Georgia, 'Times New Roman', serif`
+- Body and CTAs: `Inter, Arial, Helvetica, sans-serif`
+
+### Safe CSS properties for email
+These work reliably across all clients:
+`background-color`, `color`, `font-family`, `font-size`, `font-weight`, `line-height`, `padding`, `margin`, `text-align`, `text-decoration`, `letter-spacing`, `border-radius`, `width`, `max-width`, `display: inline-block`
+
+### Avoid in email HTML
+- `display: flex` or `display: grid` — not supported in Outlook
+- `<div>` as layout wrapper — use `<table>` instead
+- CSS shorthand `font:` or `border:` — expand to individual properties
+- `background` shorthand — use `background-color` only
+- External stylesheets or `@import`
+- `class=` attributes — they will be ignored after `<head>` is stripped
+
+### Compliance check addition
+When reviewing HTML email output, add these checks to the pass/flag table:
+- No `<style>` block present
+- No `class=` attributes on any element
+- All layout uses `<table>` not `<div>`
+- All fonts have web-safe fallbacks
+- CTA is an `<a>` tag with full inline styles, not a `<button>`
+
 ## SMS
 
 | Element | Limit | Notes |
