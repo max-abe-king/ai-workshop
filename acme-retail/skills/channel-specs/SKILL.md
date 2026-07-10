@@ -109,6 +109,108 @@ These work reliably across all clients:
 - External stylesheets or `@import`
 - `class=` attributes — they will be ignored after `<head>` is stripped
 
+### Width and layout
+Always set both the table `width` attribute AND inline `max-width` for mobile safety:
+```html
+<table width="600" cellpadding="0" cellspacing="0" border="0"
+  style="width: 100%; max-width: 600px;">
+```
+600px is the safe desktop email width. On mobile, `max-width: 600px` with `width: 100%` lets it collapse correctly.
+
+### Images
+Every image must have:
+- `alt=""` attribute — always, even if decorative (use empty string for decorative)
+- Explicit `width` and `height` attributes — prevents layout collapse when images are blocked
+- External hosted URL — Engage image manager uses Beefree AWS S3/CloudFront which may not persist; use a stable external CDN URL instead
+- Design so the email is readable with images off — never put critical content (offer, CTA) inside an image
+
+```html
+<img src="https://cdn.acmeretail.com/emails/hero.jpg"
+  alt="20% off your next order"
+  width="600" height="300"
+  style="display: block; width: 100%; height: auto; border: 0;">
+```
+
+### Dark mode safety
+Gmail and Outlook auto-invert colors in dark mode rather than honoring CSS. To survive inversion:
+- Never use white text on a near-white background — it will invert to dark-on-dark
+- The Midnight Navy (#0F2742) header and Driftwood (#F2EDE4) canvas have sufficient contrast to survive inversion
+- Add `style="color: #ffffff;"` explicitly on all white text — don't rely on inherited color
+
+### Unsubscribe link
+Engage requires a real unsubscribe merge tag — not just footer text. Use the Liquid variable in the footer:
+```html
+<a href="{{unsubscribe_url}}"
+  style="color: #0A7C82; text-decoration: underline; font-family: Inter, Arial, sans-serif; font-size: 11px;">
+  Unsubscribe
+</a>
+```
+Never hardcode a URL — `{{unsubscribe_url}}` is resolved by Engage at send time.
+
+### Plain text version
+Every HTML email must have a plain text companion for deliverability. When generating the HTML email, also produce a plain text version in this format:
+```
+[Subject line text]
+
+[Hero copy]
+
+[Body copy — no HTML, no formatting]
+
+CLAIM YOUR OFFER: [URL placeholder]
+
+---
+Acme Retail, Inc. | 450 Commerce Blvd, Suite 100, Austin, TX 78701
+Unsubscribe: {{unsubscribe_url}}
+```
+
+### Personalization with Liquid
+Engage uses Liquid syntax for merge tags. All personalization references the parent segment output columns via `profile.`:
+
+```html
+<!-- Name personalization -->
+<p style="...">Hi {{profile.first_name | default: "there"}},</p>
+
+<!-- Points value -->
+<strong>{{profile.points_balance | default: "0"}} points</strong>
+
+<!-- Conditional block -->
+{% if profile.loyalty_tier == 'Gold' %}
+  <p style="...">As a Gold member, you get early access.</p>
+{% endif %}
+```
+
+Always use `| default:` fallback on every merge tag — if the attribute is null for a customer, blank text will appear without it.
+
+### Engage YAML wrapper
+HTML alone cannot be pushed to Engage. Every template requires a companion YAML file with `editor_type: grapesjs`. Without `grapesjs`, Engage uses its Beefree editor which can't accept raw HTML.
+
+```yaml
+type: template
+name: "Acme Retail Re-engagement"
+workspace: "Acme Retail"
+editor_type: grapesjs
+email:
+  subject: "{{profile.first_name | default: 'Hey'}}, your 20% off is waiting"
+  html_file: ./template.html
+  variables:
+    - name: first_name
+      preview_value: "{{profile.first_name}}"
+      default_value: "there"
+    - name: points_balance
+      preview_value: "{{profile.points_balance}}"
+      default_value: "0"
+```
+
+Every `{{profile.*}}` used in the HTML or subject line needs a matching entry in `variables`.
+
+### Engage sanitization
+Engage will rewrite some HTML markup during import for deliverability and compatibility. To minimize unexpected changes:
+- Keep HTML structure simple — nested tables, no exotic tags
+- Do not use JavaScript of any kind
+- Do not use `<form>` elements
+- Do not use `position: absolute/fixed/relative`
+- Do not use `<iframe>` or `<video>`
+
 ### Compliance check addition
 When reviewing HTML email output, add these checks to the pass/flag table:
 - No `<style>` block present
@@ -116,6 +218,11 @@ When reviewing HTML email output, add these checks to the pass/flag table:
 - All layout uses `<table>` not `<div>`
 - All fonts have web-safe fallbacks
 - CTA is an `<a>` tag with full inline styles, not a `<button>`
+- All images have `alt`, `width`, and `height` attributes
+- Unsubscribe uses `{{unsubscribe_url}}` not a hardcoded URL
+- All merge tags use `| default:` fallback
+- Companion YAML file includes `editor_type: grapesjs`
+- Plain text version produced alongside HTML
 
 ## SMS
 
