@@ -23,7 +23,7 @@ Use this skill whenever building or pushing a CDP journey in the Acme Retail wor
 
 ## Connector Catalog
 
-There are **2 connections** in this account. Always use these exact names in `connection:` fields.
+There are **4 connections** in this account. Always use these exact names in `connection:` fields.
 
 ### `engage_studio` — Treasure Engage V1 (email)
 
@@ -69,6 +69,42 @@ connector_config:
 ```
 
 > Replace `PLACEHOLDER_CAMPAIGN_NAME` with your campaign name (e.g. `"Everything Is Free Campaign"`). Both push and SMS can share one spreadsheet with different `sheet_title` values.
+
+---
+
+### `google_ads` — Google Ads (digital media / paid audiences)
+
+Use when the journey requires a digital media activation — suppression lists, retargeting audiences, or lookalike seed lists pushed to Google Ads.
+
+```yaml
+connection: google_ads
+all_columns: true
+run_after_journey_refresh: true
+connector_config:
+  customer_id: "PLACEHOLDER_CUSTOMER_ID"     # Google Ads account ID (no dashes)
+  list_name: "PLACEHOLDER_AUDIENCE_NAME"     # Name of the Customer Match list in Google Ads
+  upload_key_type: CONTACT_INFO              # CONTACT_INFO (email) or MOBILE_ADVERTISING_ID
+```
+
+> **Note:** `customer_id` is the 10-digit Google Ads account ID without dashes. `upload_key_type: CONTACT_INFO` hashes email addresses automatically before upload — never send raw PII. The audience list will appear in Google Ads → Audience Manager → Customer Match within 24–48 hours of activation.
+
+---
+
+### `everything_connector` — Universal fallback (any other channel)
+
+Use when the journey needs to activate a channel not covered by the above connectors — webhook, data export, third-party platform, or any custom integration. Writes the audience to a configurable destination.
+
+```yaml
+connection: everything_connector
+all_columns: true
+run_after_journey_refresh: true
+connector_config:
+  destination: "PLACEHOLDER_DESTINATION"    # e.g. webhook URL, S3 path, platform name
+  format: "json"                             # json, csv, or tsv
+  mode: append                               # append or replace
+```
+
+> **When to use:** if you need to activate a channel that isn't email, SMS, push, or paid media — or if you're unsure which connector fits — start with `everything_connector`. It's the most flexible option and can be reconfigured for the target platform later without changing the journey structure.
 
 ---
 
