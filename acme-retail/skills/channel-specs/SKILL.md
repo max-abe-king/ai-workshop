@@ -184,24 +184,41 @@ Always use `| default:` fallback on every merge tag — if the attribute is null
 ### Engage YAML wrapper
 HTML alone cannot be pushed to Engage. Every template requires a companion YAML file with `editor_type: grapesjs`. Without `grapesjs`, Engage uses its Beefree editor which can't accept raw HTML.
 
+**All fields are top-level — do not nest under `email:` or any other key.**
+
 ```yaml
 type: template
 name: "Acme Retail Re-engagement"
 workspace: "Acme Retail"
 editor_type: grapesjs
-email:
-  subject: "{{profile.first_name | default: 'Hey'}}, your 20% off is waiting"
-  html_file: ./template.html
-  variables:
-    - name: first_name
-      preview_value: "{{profile.first_name}}"
-      default_value: "there"
-    - name: points_balance
-      preview_value: "{{profile.points_balance}}"
-      default_value: "0"
+subject: "{{profile.first_name | default: 'Hey'}}, your 20% off is waiting"
+html_file: ./template-inlined.html
 ```
 
-Every `{{profile.*}}` used in the HTML or subject line needs a matching entry in `variables`.
+**Three things that will break the validator:**
+
+1. **`email:` nesting** — `subject` and `html_file` must be top-level fields. Nesting them under `email:` causes the validator to report them missing with no hint that nesting is the cause:
+```yaml
+# WRONG — validator will report subject and html_file missing
+email:
+  subject: "Your 20% off is waiting"
+  html_file: ./template-inlined.html
+
+# CORRECT — flat, top-level
+subject: "Your 20% off is waiting"
+html_file: ./template-inlined.html
+```
+
+2. **`html_file` pointing at the raw file** — always reference the juice-inlined output, not the original HTML. The inline step is documented in the journey-launch skill:
+```yaml
+# WRONG — pre-juice file, style blocks will be stripped by Engage
+html_file: ./template.html
+
+# CORRECT — juice-inlined file
+html_file: ./template-inlined.html
+```
+
+3. **`variables:` block** — do not include it. The validator rejects it with `TEMPLATE_INVALID_VARIABLES`. Liquid personalization (`{{profile.first_name}}`) works in the HTML and subject line without a `variables:` block — Engage resolves merge tags directly from the parent segment at send time.
 
 ### Engage sanitization
 Engage will rewrite some HTML markup during import for deliverability and compatibility. To minimize unexpected changes:
