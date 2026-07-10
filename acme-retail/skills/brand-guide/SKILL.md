@@ -1,12 +1,3 @@
-
-Skill — acme-retail-brand-guide
-
-Page
-1
-/
-1
-100%
-"Data Classification" label was auto-applied to this file and set to "Internal Use"
 ---
 name: acme-retail-brand-guide
 description: Use when writing, reviewing, or checking any marketing creative for Acme Retail. Loads the full Acme Retail brand system — voice, tone, color palette, typography, logo usage, button styles, offer conventions, and CTA rules. Triggers on: "write copy for Acme Retail", "brand guide", "is this on brand", "check this copy", "Acme Retail creative", "write an email for Acme", "acme brand voice", "acme colors", "acme logo", or any request to generate or review Acme Retail marketing assets.
