@@ -145,6 +145,34 @@ Warm, direct, and unpretentious. Write like a knowledgeable friend — not a sal
 
 ---
 
+## HTML Email Requirements
+
+When generating any HTML email for Acme Retail, it must be Engage-ready from the start. Apply all of these rules — do not generate a browser-first version and inline later.
+
+**Non-negotiable rules:**
+- **All styles must be inline** (`style=""` attributes only) — no `<style>` blocks, no `class=` attributes. Engage strips the `<head>` entirely; anything there is invisible.
+- **Layout must use `<table>`**, not `<div>` — `<div>` layout breaks in Outlook.
+- **Footer must include the unsubscribe Liquid tag** — never a hardcoded URL:
+  ```html
+  <a href="{{unsubscribe_url}}" style="color: #0A7C82; text-decoration: underline; font-family: Inter, Arial, sans-serif; font-size: 11px;">Unsubscribe</a>
+  ```
+- **Every merge tag must use a `| default:` fallback** — e.g. `{{profile.first_name | default: "there"}}`. A null attribute renders as blank without it.
+- **Subject line personalization** uses Liquid: `{{profile.first_name | default: "there"}}, your offer is waiting`
+- **Companion YAML** is required to push to Engage — `editor_type: grapesjs` must be set at the top level (never nested under `email:`):
+  ```yaml
+  type: template
+  name: "Acme Retail — Campaign Name"
+  workspace: "Acme Retail"
+  editor_type: grapesjs
+  subject: "{{profile.first_name | default: 'Hey'}}, your offer is waiting"
+  html_file: ./template-inlined.html
+  ```
+- **Plain text companion** — always produce a plain text version alongside the HTML for deliverability.
+
+> For full inline style patterns, font stacks, image rules, dark mode safety, and Engage sanitization rules, load the `acme-retail-channel-specs` skill.
+
+---
+
 ## Compliance Check
 
 After writing any asset, check each element against this guide and present a pass/flag table before delivering the final output:
@@ -154,9 +182,18 @@ After writing any asset, check each element against this guide and present a pas
 | Email | Subject line | Pass/Flag | reason if flagged |
 | Email | CTA text | Pass/Flag | reason if flagged |
 | Email | Offer language | Pass/Flag | reason if flagged |
+| Email HTML | No `<style>` block | Pass/Flag | reason if flagged |
+| Email HTML | No `class=` attributes | Pass/Flag | reason if flagged |
+| Email HTML | Layout uses `<table>` not `<div>` | Pass/Flag | reason if flagged |
+| Email HTML | All fonts have web-safe fallbacks | Pass/Flag | reason if flagged |
+| Email HTML | CTA is `<a>` with full inline styles | Pass/Flag | reason if flagged |
+| Email HTML | Images have `alt`, `width`, `height` | Pass/Flag | reason if flagged |
+| Email HTML | Unsubscribe uses `{{unsubscribe_url}}` | Pass/Flag | reason if flagged |
+| Email HTML | All merge tags use `\| default:` | Pass/Flag | reason if flagged |
+| Email HTML | YAML has `editor_type: grapesjs` | Pass/Flag | reason if flagged |
+| Email HTML | Plain text version produced | Pass/Flag | reason if flagged |
 | SMS | Character count | Pass/Flag | reason if flagged |
 | SMS | Opt-out present | Pass/Flag | reason if flagged |
 | Push | Title standalone | Pass/Flag | reason if flagged |
 
 Fix all flagged items before presenting the final output.
-Displaying Skill — acme-retail-brand-guide.

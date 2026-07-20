@@ -28,6 +28,8 @@ Apply these limits and structure rules when writing or adapting any Acme Retail 
 
 ## HTML Email — Engage Compatibility Rules
 
+> **Always load this skill when generating HTML email.** The `acme-retail-brand-guide` skill requires it for all HTML rendering patterns.
+
 Engage and most email clients strip everything inside `<head>` — including `<style>` blocks and CSS classes. A browser preview will look correct because browsers support `<style>` blocks, but the email will break in Engage and in Gmail, Outlook, and Apple Mail.
 
 **The rule: every style must be written as an inline `style=""` attribute. No exceptions.**
